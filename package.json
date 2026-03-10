@@ -1,0 +1,15 @@
+{
+  "name": "choikuji-server",
+  "version": "1.0.0",
+  "description": "초이쿠지 통합 적립 관리자",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^11.0.0",
+    "express-session": "^1.17.3",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>초이쿠지 통합 적립 현황</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:#101014;color:#ececf0;padding:20px 24px;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5;min-height:100vh}
+    h1{font-size:1.15rem;margin-bottom:4px;color:#ececf0;font-weight:800;letter-spacing:-0.3px;display:flex;align-items:center;gap:10px}
+    h1::before{content:'';display:inline-block;width:5px;height:18px;background:#a63d3d;border-radius:3px;flex-shrink:0}
+    .date{color:#5c5c6e;font-size:0.78rem;margin-bottom:18px}
+    .toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    .toolbar input{flex:1;min-width:120px;padding:9px 12px;background:#101014;border:1px solid #2a2a34;border-radius:8px;color:#ececf0;font-size:0.85rem;font-family:inherit}
+    .toolbar input:focus{outline:none;border-color:#a63d3d;box-shadow:0 0 0 2px rgba(166,61,61,0.14)}
+    .toolbar select{padding:9px 12px;background:#101014;border:1px solid #2a2a34;border-radius:8px;color:#ececf0;font-size:0.8rem;font-family:inherit}
+    .toolbar select:focus{outline:none;border-color:#a63d3d}
+    .toolbar button{padding:9px 16px;background:#a63d3d;color:#101014;border:none;border-radius:8px;font-weight:600;font-size:0.8rem;font-family:inherit;cursor:pointer;white-space:nowrap}
+    .toolbar button:active{opacity:0.85}
+    .result-msg{text-align:center;color:#fbbf24;font-size:0.82rem;margin-bottom:10px;display:none}
+    table{width:100%;border-collapse:collapse;font-size:0.8rem}
+    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #2a2a34}
+    th{background:#1e1e24;font-weight:600;color:#5c5c6e;position:sticky;top:0;z-index:1;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.4px}
+    tr:hover{background:rgba(166,61,61,0.04)}
+    .r{text-align:right}.green{color:#4ade80}.red{color:#f87171}.purple{color:#a63d3d}.bold{font-weight:700}
+    .code{color:#5c5c6e;font-size:0.72rem}
+    tr.highlight{background:rgba(166,61,61,0.1)!important}
+    tr.hidden{display:none}
+    .footer{text-align:center;color:#5c5c6e;font-size:0.7rem;margin-top:24px;padding-top:14px;border-top:1px solid #2a2a34}
+    .loading{text-align:center;padding:60px 20px;color:#5c5c6e}
+    .loading .spinner{width:32px;height:32px;border:3px solid #2a2a34;border-top-color:#a63d3d;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-state{text-align:center;padding:60px 20px;color:#5c5c6e}
+    .update-badge{display:inline-block;background:rgba(74,222,128,0.12);color:#4ade80;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600;margin-left:8px}
+    @media(max-width:600px){th,td{padding:6px 5px;font-size:0.72rem}h1{font-size:1rem}.toolbar input,.toolbar select{font-size:0.78rem;padding:8px 10px}.toolbar button{padding:8px 12px;font-size:0.75rem}}
+  </style>
+</head>
+<body>
+  <h1>통합 적립 현황</h1>
+  <div class="date" id="info">불러오는 중...</div>
+  <div class="toolbar" id="toolbar" style="display:none">
+    <input type="text" id="q" placeholder="이름 또는 코드 검색..." oninput="fil()" onkeydown="if(event.key==='Enter')fil()">
+    <select id="sortSel" onchange="sortTable()">
+      <option value="name">ㄱㄴㄷ순</option>
+      <option value="stickers-desc">남은스티커 높은순</option>
+      <option value="stickers-asc">남은스티커 낮은순</option>
+      <option value="points-desc">남은포인트 높은순</option>
+      <option value="points-asc">남은포인트 낮은순</option>
+    </select>
+    <button onclick="fil()">검색</button>
+  </div>
+  <div class="result-msg" id="rmsg"></div>
+  <div id="content"><div class="loading"><div class="spinner"></div>데이터를 불러오고 있습니다...</div></div>
+  <div class="footer">통합 적립 관리자</div>
+
+  <script>
+    let allData = [];
+
+    async function load() {
+      try {
+        const res = await fetch('/api/published');
+        const data = await res.json();
+        if (!data || !data.members || !data.members.length) {
+          document.getElementById('content').innerHTML = '<div class="empty-state"><p>아직 발행된 데이터가 없습니다.</p></div>';
+          document.getElementById('info').textContent = '데이터 없음';
+          return;
+        }
+        allData = data.members;
+        const d = new Date(data.publishedAt);
+        const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+        document.getElementById('info').innerHTML = ds + ' 업데이트 · ' + allData.length + '명<span class="update-badge">최신</span>';
+        renderTable();
+        document.getElementById('toolbar').style.display = 'flex';
+      } catch(e) {
+        document.getElementById('content').innerHTML = '<div class="empty-state"><p>데이터를 불러오지 못했습니다.</p></div>';
+      }
+    }
+
+    function renderTable() {
+      document.getElementById('content').innerHTML = '<table><thead><tr><th>코드</th><th>이름</th><th class="r">적립스티커</th><th class="r">소진스티커</th><th class="r">남은스티커</th><th class="r">남은포인트</th></tr></thead><tbody id="tb">' +
+        allData.map(m => {
+          const sr=m.stickers_earned-m.stickers_used, pr=m.earned-m.used;
+          return '<tr data-code="'+(m.code||'')+'" data-name="'+m.name+'" data-sr="'+sr+'" data-pr="'+pr+'"><td class="code">'+(m.code||'')+'</td><td>'+m.name+'</td><td class="r">'+m.stickers_earned+'</td><td class="r red">'+m.stickers_used+'</td><td class="r green bold">'+sr+'</td><td class="r purple bold">'+pr.toLocaleString()+'</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+
+    function fil() {
+      const q=document.getElementById('q').value.trim().toLowerCase();
+      const rows=document.querySelectorAll('#tb tr');let cnt=0;
+      rows.forEach(r=>{const n=r.getAttribute('data-name').toLowerCase(),c=r.getAttribute('data-code').toLowerCase();const show=!q||n.includes(q)||c.includes(q);r.className=show?(q?'highlight':''):'hidden';if(show&&q)cnt++;});
+      const msg=document.getElementById('rmsg');
+      if(q){msg.style.display='block';msg.textContent=cnt?cnt+'명 검색됨':'검색 결과가 없습니다.';}else{msg.style.display='none';}
+    }
+
+    function sortTable() {
+      const s=document.getElementById('sortSel').value;
+      const cmp={'name':(a,b)=>a.name.localeCompare(b.name,'ko'),'stickers-desc':(a,b)=>(b.stickers_earned-b.stickers_used)-(a.stickers_earned-a.stickers_used),'stickers-asc':(a,b)=>(a.stickers_earned-a.stickers_used)-(b.stickers_earned-b.stickers_used),'points-desc':(a,b)=>(b.earned-b.used)-(a.earned-a.used),'points-asc':(a,b)=>(a.earned-a.used)-(b.earned-b.used)};
+      allData.sort(cmp[s]||cmp['name']);renderTable();
+      if(document.getElementById('q').value.trim())fil();
+    }
+
+    load();
+  </script>
+</body>
+</html>
