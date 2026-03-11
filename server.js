@@ -21,9 +21,18 @@ app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== Turso DB 초기화 ====================
+const dbUrl = process.env.TURSO_DATABASE_URL || 'file:local.db';
+const dbToken = process.env.TURSO_AUTH_TOKEN || undefined;
+
+console.log('========== DB 설정 ==========');
+console.log('TURSO_DATABASE_URL 환경변수:', process.env.TURSO_DATABASE_URL ? '존재함' : '없음');
+console.log('사용할 DB URL:', dbUrl);
+console.log('Auth Token:', dbToken ? '설정됨' : '미설정');
+console.log('==============================');
+
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL || 'file:local.db',
-  authToken: process.env.TURSO_AUTH_TOKEN || undefined,
+  url: dbUrl,
+  authToken: dbToken,
 });
 
 async function initDB() {
