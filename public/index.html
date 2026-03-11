@@ -8,53 +8,257 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon-192.png">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:#101014;color:#ececf0;padding:20px 24px;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5;min-height:100vh}
-    h1{font-size:1.15rem;margin-bottom:4px;color:#ececf0;font-weight:800;letter-spacing:-0.3px;display:flex;align-items:center;gap:10px}
-    h1::before{content:'';display:inline-block;width:5px;height:18px;background:#a63d3d;border-radius:3px;flex-shrink:0}
-    .date{color:#5c5c6e;font-size:0.78rem;margin-bottom:18px}
-    .toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-    .toolbar input{flex:1;min-width:120px;padding:9px 12px;background:#101014;border:1px solid #2a2a34;border-radius:8px;color:#ececf0;font-size:0.85rem;font-family:inherit}
-    .toolbar input:focus{outline:none;border-color:#a63d3d;box-shadow:0 0 0 2px rgba(166,61,61,0.14)}
-    .toolbar select{padding:9px 12px;background:#101014;border:1px solid #2a2a34;border-radius:8px;color:#ececf0;font-size:0.8rem;font-family:inherit}
-    .toolbar select:focus{outline:none;border-color:#a63d3d}
-    .toolbar button{padding:9px 16px;background:#a63d3d;color:#101014;border:none;border-radius:8px;font-weight:600;font-size:0.8rem;font-family:inherit;cursor:pointer;white-space:nowrap}
-    .toolbar button:active{opacity:0.85}
-    .result-msg{text-align:center;color:#fbbf24;font-size:0.82rem;margin-bottom:10px;display:none}
-    table{width:100%;border-collapse:collapse;font-size:0.8rem}
-    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #2a2a34}
-    th{background:#1e1e24;font-weight:600;color:#5c5c6e;position:sticky;top:0;z-index:1;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.4px}
-    tr:hover{background:rgba(166,61,61,0.04)}
-    .r{text-align:right}.green{color:#4ade80}.red{color:#f87171}.purple{color:#60a5fa}.bold{font-weight:700}
-    .code{color:#5c5c6e;font-size:0.72rem}
-    tr.highlight{background:rgba(166,61,61,0.1)!important}
-    tr.hidden{display:none}
-    .footer{text-align:center;color:#5c5c6e;font-size:0.7rem;margin-top:24px;padding-top:14px;border-top:1px solid #2a2a34}
-    .loading{text-align:center;padding:60px 20px;color:#5c5c6e}
-    .loading .spinner{width:32px;height:32px;border:3px solid #2a2a34;border-top-color:#a63d3d;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .empty-state{text-align:center;padding:60px 20px;color:#5c5c6e}
-    .update-badge{display:inline-block;background:rgba(74,222,128,0.12);color:#4ade80;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:600;margin-left:8px}
-    @media(max-width:600px){th,td{padding:6px 5px;font-size:0.72rem}h1{font-size:1rem}.toolbar input,.toolbar select{font-size:0.78rem;padding:8px 10px}.toolbar button{padding:8px 12px;font-size:0.75rem}}
+    /* ===== Variables (관리자 style.css와 동일) ===== */
+    :root {
+      --bg-base: #101014;
+      --bg-raised: #18181c;
+      --bg-surface: #1e1e24;
+      --bg-hover: #26262e;
+      --border: #2a2a34;
+      --border-light: #34343e;
+      --text-primary: #ececf0;
+      --text-secondary: #9898a6;
+      --text-muted: #5c5c6e;
+      --accent: #a63d3d;
+      --accent-dim: rgba(166, 61, 61, 0.14);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.12);
+      --red: #f87171;
+      --red-dim: rgba(248, 113, 113, 0.12);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96, 165, 250, 0.12);
+      --yellow: #fbbf24;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: 0.15s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ===== Header (관리자와 동일 구조) ===== */
+    .header {
+      background: var(--bg-raised);
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header h1::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .header .date {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      margin-top: 4px;
+    }
+
+    /* ===== Main Content ===== */
+    .main {
+      padding: 22px 28px;
+    }
+
+    /* ===== Toolbar (관리자 스타일) ===== */
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .toolbar input {
+      flex: 1;
+      min-width: 120px;
+      padding: 9px 12px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .toolbar input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-dim);
+    }
+    .toolbar select {
+      padding: 9px 12px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-family: inherit;
+      transition: border-color var(--transition);
+    }
+    .toolbar select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .toolbar button {
+      padding: 9px 16px;
+      background: var(--accent);
+      color: var(--bg-base);
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.8rem;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--transition);
+    }
+    .toolbar button:hover { background: #8f3434; }
+    .toolbar button:active { transform: scale(0.97); }
+
+    /* ===== Result Message ===== */
+    .result-msg {
+      text-align: center;
+      color: var(--yellow);
+      font-size: 0.82rem;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    /* ===== Card wrapper (관리자 .card 스타일) ===== */
+    .card {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    /* ===== Table (관리자와 동일) ===== */
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    th {
+      background: var(--bg-surface);
+      font-weight: 600;
+      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    tr:hover { background: rgba(166, 61, 61, 0.04); }
+
+    .r { text-align: right; }
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .purple { color: var(--blue); }
+    .bold { font-weight: 700; }
+    .code { color: var(--text-muted); font-size: 0.72rem; }
+
+    tr.highlight { background: var(--accent-dim) !important; }
+    tr.hidden { display: none; }
+
+    /* ===== Update Badge (관리자 .badge-green 스타일) ===== */
+    .update-badge {
+      display: inline-block;
+      background: var(--green-dim);
+      color: var(--green);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ===== Loading & Empty ===== */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .loading .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .header { padding: 12px 14px; }
+      .header h1 { font-size: 1rem; }
+      .main { padding: 14px; }
+      th, td { padding: 6px 5px; font-size: 0.72rem; }
+      .toolbar input, .toolbar select { font-size: 0.78rem; padding: 8px 10px; }
+      .toolbar button { padding: 8px 12px; font-size: 0.75rem; }
+    }
   </style>
 </head>
 <body>
-  <h1>통합 적립 현황</h1>
-  <div class="date" id="info">불러오는 중...</div>
-  <div class="toolbar" id="toolbar" style="display:none">
-    <input type="text" id="q" placeholder="이름 또는 코드 검색..." oninput="fil()" onkeydown="if(event.key==='Enter')fil()">
-    <select id="sortSel" onchange="sortTable()">
-      <option value="name">ㄱㄴㄷ순</option>
-      <option value="stickers-desc">남은스티커 높은순</option>
-      <option value="stickers-asc">남은스티커 낮은순</option>
-      <option value="points-desc">남은포인트 높은순</option>
-      <option value="points-asc">남은포인트 낮은순</option>
-    </select>
-    <button onclick="fil()">검색</button>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>통합 적립 현황</h1>
+    <div class="date" id="info">불러오는 중...</div>
   </div>
-  <div class="result-msg" id="rmsg"></div>
-  <div id="content"><div class="loading"><div class="spinner"></div>데이터를 불러오고 있습니다...</div></div>
-  <div class="footer">통합 적립 관리자</div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="toolbar" id="toolbar" style="display:none">
+      <input type="text" id="q" placeholder="이름 또는 코드 검색..." oninput="fil()" onkeydown="if(event.key==='Enter')fil()">
+      <select id="sortSel" onchange="sortTable()">
+        <option value="name">ㄱㄴㄷ순</option>
+        <option value="stickers-desc">남은스티커 높은순</option>
+        <option value="stickers-asc">남은스티커 낮은순</option>
+        <option value="points-desc">남은포인트 높은순</option>
+        <option value="points-asc">남은포인트 낮은순</option>
+      </select>
+      <button onclick="fil()">검색</button>
+    </div>
+    <div class="result-msg" id="rmsg"></div>
+    <div id="content"><div class="loading"><div class="spinner"></div>데이터를 불러오고 있습니다...</div></div>
+    <div class="footer">통합 적립 관리자</div>
+  </div>
 
   <script>
     let allData = [];
@@ -80,11 +284,11 @@
     }
 
     function renderTable() {
-      document.getElementById('content').innerHTML = '<table><thead><tr><th>코드</th><th>이름</th><th class="r">적립스티커</th><th class="r">소진스티커</th><th class="r">남은스티커</th><th class="r">남은포인트</th></tr></thead><tbody id="tb">' +
+      document.getElementById('content').innerHTML = '<div class="card"><table><thead><tr><th>코드</th><th>이름</th><th class="r">적립스티커</th><th class="r">소진스티커</th><th class="r">남은스티커</th><th class="r">남은포인트</th></tr></thead><tbody id="tb">' +
         allData.map(m => {
           const sr=m.stickers_earned-m.stickers_used, pr=m.earned-m.used;
           return '<tr data-code="'+(m.code||'')+'" data-name="'+m.name+'" data-sr="'+sr+'" data-pr="'+pr+'"><td class="code">'+(m.code||'')+'</td><td>'+m.name+'</td><td class="r">'+m.stickers_earned+'</td><td class="r red">'+m.stickers_used+'</td><td class="r green bold">'+sr+'</td><td class="r purple bold">'+pr.toLocaleString()+'</td></tr>';
-        }).join('') + '</tbody></table>';
+        }).join('') + '</tbody></table></div>';
     }
 
     function fil() {
